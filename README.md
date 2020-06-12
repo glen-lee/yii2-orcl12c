@@ -76,8 +76,7 @@ It is recommended to use this repo as a base for your PHP project development. F
    * Github : https://github.com/kartik-v/yii2-widget-select2
    * Simple dropdown from database  : https://www.youtube.com/watch?v=Kg17wiJfGA8&t=322s
 
-5. File Download through browser
-   * Guide : https://www.yiiframework.com/doc/api/2.0/yii-web-response#sendFile()-detail 
+5. File Download through browser : https://www.yiiframework.com/doc/api/2.0/yii-web-response#sendFile()-detail 
 
 6. Template (UI) Admin LTE : https://github.com/dmstr/yii2-adminlte-asset  
 
