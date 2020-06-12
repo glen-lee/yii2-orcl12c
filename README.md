@@ -66,8 +66,8 @@ It is recommended to use this repo as a base for your PHP project development. F
 
 3. Multiple files upload 
    * Notes :
-      1. Adjust php.ini's post_max_size and upload_max_filesize values and set them according to your max file/post size allowed
-      2. Use the function getInstances() instead of getInstance() for multiple file upload
+      1. Adjust `php.ini`'s `post_max_size` and `upload_max_filesize` values and set them according to your max file/post size allowed
+      2. Use the function `getInstances()` instead of `getInstance()` for multiple file upload
       3. Make sure to write the file first before saving the model. If file write succeed then save the model
    * video : https://www.youtube.com/watch?v=NKG24GJpZRA
 
