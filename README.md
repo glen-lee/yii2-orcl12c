@@ -52,32 +52,32 @@ It is recommended to use this repo as a base for your PHP project development. F
 
 ## References for development using Yii2 Framework ##
 1. Autocomplete
-   * video : https://www.youtube.com/watch?v=UGZvggiYGHk
-   * github : https://github.com/kartik-v/yii2-widget-select2
+   * Video : https://www.youtube.com/watch?v=UGZvggiYGHk
+   * Github : https://github.com/kartik-v/yii2-widget-select2
 
 2. Datepicker
-   * video : https://www.youtube.com/watch?v=dkNGB2OSNho   
-   * datepicker : https://github.com/2amigos/yii2-date-picker-widget
+   * Video : https://www.youtube.com/watch?v=dkNGB2OSNho   
+   * Github : https://github.com/2amigos/yii2-date-picker-widget
 
 3. E-mail
-   * video : https://www.youtube.com/watch?v=1INgAuiUrw8
-   * guide : http://www.yiiframework.com/doc-2.0/guide-tutorial-mailing.html
-   * guide : http://www.yiiframework.com/doc-2.0/yii-swiftmailer-mailer.html
+   * Video : https://www.youtube.com/watch?v=1INgAuiUrw8
+   * Guide : http://www.yiiframework.com/doc-2.0/guide-tutorial-mailing.html
+   * Guide : http://www.yiiframework.com/doc-2.0/yii-swiftmailer-mailer.html
 
 3. Multiple files upload 
    * Notes :
       1. Adjust `php.ini`'s `post_max_size` and `upload_max_filesize` values and set them according to your max file/post size allowed
       2. Use the function `getInstances()` instead of `getInstance()` for multiple file upload
       3. Make sure to write the file first before saving the model. If file write succeed then save the model
-   * video : https://www.youtube.com/watch?v=NKG24GJpZRA
+   * Video : https://www.youtube.com/watch?v=NKG24GJpZRA
 
 4. Dropdown
-   * video : https://www.youtube.com/watch?v=Z6v9KeKDHjc
-   * github : https://github.com/kartik-v/yii2-widget-select2
-   * simple dropdown from database  : https://www.youtube.com/watch?v=Kg17wiJfGA8&t=322s
+   * Video : https://www.youtube.com/watch?v=Z6v9KeKDHjc
+   * Github : https://github.com/kartik-v/yii2-widget-select2
+   * Simple dropdown from database  : https://www.youtube.com/watch?v=Kg17wiJfGA8&t=322s
 
 5. File Download through browser
-   * guide : https://www.yiiframework.com/doc/api/2.0/yii-web-response#sendFile()-detail 
+   * Guide : https://www.yiiframework.com/doc/api/2.0/yii-web-response#sendFile()-detail 
 
 6. Template (UI) Admin LTE : https://github.com/dmstr/yii2-adminlte-asset  
 
