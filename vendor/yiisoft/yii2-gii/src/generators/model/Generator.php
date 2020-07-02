@@ -555,89 +555,150 @@ class Generator extends \yii\gii\Generator
     protected function generateRelations()
     {
         $db = $this->getDbConnection();
-        $schema = $db->getSchema();
-        $tableForModel = Yii::$app->request->post()["Generator"]["tableName"];
-        $db = $this->getDbConnection();
-      
-        $relations = [];
-        $schemaNames = $this->getSchemaNames();
-      
-        if ($this->generateRelations === self::RELATIONS_NONE) {
-            return [];
-        }
+        $db_type = (explode(":", $db->dsn))[0];
+        
+        if($db_type == "oci") {
+            $schema = $db->getSchema();
+            $tableForModel = Yii::$app->request->post()["Generator"]["tableName"];
+            $db = $this->getDbConnection();
+        
+            $relations = [];
+            $schemaNames = $this->getSchemaNames();
+        
+            if ($this->generateRelations === self::RELATIONS_NONE) {
+                return [];
+            }
 
-        $sql = <<<'SQL'
-WITH 
-U_CONS AS (SELECT /*+materialized*/ * FROM USER_CONSTRAINTS),
-U_CONS_COL AS (SELECT /*+materialized*/ * FROM  USER_CONS_COLUMNS)
-SELECT 
-    E.TABLE_NAME AS TABLE_REF,
-    E.CONSTRAINT_NAME
-FROM U_CONS D JOIN U_CONS E ON E.OWNER = D.R_OWNER AND E.CONSTRAINT_NAME = D.R_CONSTRAINT_NAME
-WHERE
-    D.OWNER = :schemaName
-    AND D.TABLE_NAME = :tableName
-ORDER BY D.CONSTRAINT_NAME
-SQL;
+            $sql = <<<'SQL'
+    WITH 
+    U_CONS AS (SELECT /*+materialized*/ * FROM USER_CONSTRAINTS),
+    U_CONS_COL AS (SELECT /*+materialized*/ * FROM  USER_CONS_COLUMNS)
+    SELECT 
+        E.TABLE_NAME AS TABLE_REF,
+        E.CONSTRAINT_NAME
+    FROM U_CONS D JOIN U_CONS E ON E.OWNER = D.R_OWNER AND E.CONSTRAINT_NAME = D.R_CONSTRAINT_NAME
+    WHERE
+        D.OWNER = :schemaName
+        AND D.TABLE_NAME = :tableName
+    ORDER BY D.CONSTRAINT_NAME
+    SQL;
 
-        foreach ($schemaNames as $schemaName) {
-            $command = $db->createCommand($sql, [
-                ':tableName' => $tableForModel,
-                ':schemaName' => $schemaName,
-            ]);
+            foreach ($schemaNames as $schemaName) {
+                $command = $db->createCommand($sql, [
+                    ':tableName' => $tableForModel,
+                    ':schemaName' => $schemaName,
+                ]);
 
-            $relatedTables = $command->queryAll();
-            $relatedTables[] = array("TABLE_REF" => $tableForModel, "CONSTRAINT_NAME" => "");
-            
-            $relatedTables = array_column($relatedTables, 'TABLE_REF');
+                $relatedTables = $command->queryAll();
+                $relatedTables[] = array("TABLE_REF" => $tableForModel, "CONSTRAINT_NAME" => "");
+                
+                $relatedTables = array_column($relatedTables, 'TABLE_REF');
 
 
-            foreach ($schema->getTableSchemas($schemaName, false, $relatedTables) as $table) {
-                $className = $this->generateClassName($table->fullName);
-                foreach ($table->foreignKeys as $refs) {
-                    $refTable = $refs[0];
-                    $refTableSchema = $db->getTableSchema($refTable);
-                    if ($refTableSchema === null) {
-                        // Foreign key could point to non-existing table: https://github.com/yiisoft/yii2-gii/issues/34
+                foreach ($schema->getTableSchemas($schemaName, false, $relatedTables) as $table) {
+                    $className = $this->generateClassName($table->fullName);
+                    foreach ($table->foreignKeys as $refs) {
+                        $refTable = $refs[0];
+                        $refTableSchema = $db->getTableSchema($refTable);
+                        if ($refTableSchema === null) {
+                            // Foreign key could point to non-existing table: https://github.com/yiisoft/yii2-gii/issues/34
+                            continue;
+                        }
+                        unset($refs[0]);
+                        $fks = array_keys($refs);
+                        $refClassName = $this->generateClassName($refTable);
+
+                        // Add relation for this table
+                        $link = $this->generateRelationLink(array_flip($refs));
+                        $relationName = $this->generateRelationName($relations, $table, $fks[0], false);
+                        $relations[$table->fullName][$relationName] = [
+                            "return \$this->hasOne($refClassName::className(), $link);",
+                            $refClassName,
+                            false,
+                        ];
+
+                        // Add relation for the referenced table
+                        $hasMany = $this->isHasManyRelation($table, $fks);
+                        $link = $this->generateRelationLink($refs);
+                        $relationName = $this->generateRelationName($relations, $refTableSchema, $className, $hasMany);
+                        $relations[$refTableSchema->fullName][$relationName] = [
+                            "return \$this->" . ($hasMany ? 'hasMany' : 'hasOne') . "($className::className(), $link);",
+                            $className,
+                            $hasMany,
+                        ];
+                    }
+
+                    if (($junctionFks = $this->checkJunctionTable($table)) === false) {
                         continue;
                     }
-                    unset($refs[0]);
-                    $fks = array_keys($refs);
-                    $refClassName = $this->generateClassName($refTable);
 
-                    // Add relation for this table
-                    $link = $this->generateRelationLink(array_flip($refs));
-                    $relationName = $this->generateRelationName($relations, $table, $fks[0], false);
-                    $relations[$table->fullName][$relationName] = [
-                        "return \$this->hasOne($refClassName::className(), $link);",
-                        $refClassName,
-                        false,
-                    ];
-
-                    // Add relation for the referenced table
-                    $hasMany = $this->isHasManyRelation($table, $fks);
-                    $link = $this->generateRelationLink($refs);
-                    $relationName = $this->generateRelationName($relations, $refTableSchema, $className, $hasMany);
-                    $relations[$refTableSchema->fullName][$relationName] = [
-                        "return \$this->" . ($hasMany ? 'hasMany' : 'hasOne') . "($className::className(), $link);",
-                        $className,
-                        $hasMany,
-                    ];
+                    $relations = $this->generateManyManyRelations($table, $junctionFks, $relations);
                 }
-
-                if (($junctionFks = $this->checkJunctionTable($table)) === false) {
-                    continue;
-                }
-
-                $relations = $this->generateManyManyRelations($table, $junctionFks, $relations);
             }
-        }
 
-        if ($this->generateRelations === self::RELATIONS_ALL_INVERSE) {
-            return $this->addInverseRelations($relations);
-        }
+            if ($this->generateRelations === self::RELATIONS_ALL_INVERSE) {
+                return $this->addInverseRelations($relations);
+            }
 
-        return $relations;
+            return $relations;
+        }
+        //Original Yii2 codes here
+        else {
+            if ($this->generateRelations === self::RELATIONS_NONE) {
+                return [];
+            }
+    
+            $db = $this->getDbConnection();
+    
+            $relations = [];
+            foreach ($this->getSchemaNames() as $schemaName) {
+                foreach ($db->getSchema()->getTableSchemas($schemaName) as $table) {
+                    $className = $this->generateClassName($table->fullName);
+                    foreach ($table->foreignKeys as $refs) {
+                        $refTable = $refs[0];
+                        $refTableSchema = $db->getTableSchema($refTable);
+                        if ($refTableSchema === null) {
+                            // Foreign key could point to non-existing table: https://github.com/yiisoft/yii2-gii/issues/34
+                            continue;
+                        }
+                        unset($refs[0]);
+                        $fks = array_keys($refs);
+                        $refClassName = $this->generateClassName($refTable);
+    
+                        // Add relation for this table
+                        $link = $this->generateRelationLink(array_flip($refs));
+                        $relationName = $this->generateRelationName($relations, $table, $fks[0], false);
+                        $relations[$table->fullName][$relationName] = [
+                            "return \$this->hasOne($refClassName::className(), $link);",
+                            $refClassName,
+                            false,
+                        ];
+    
+                        // Add relation for the referenced table
+                        $hasMany = $this->isHasManyRelation($table, $fks);
+                        $link = $this->generateRelationLink($refs);
+                        $relationName = $this->generateRelationName($relations, $refTableSchema, $className, $hasMany);
+                        $relations[$refTableSchema->fullName][$relationName] = [
+                            "return \$this->" . ($hasMany ? 'hasMany' : 'hasOne') . "($className::className(), $link);",
+                            $className,
+                            $hasMany,
+                        ];
+                    }
+    
+                    if (($junctionFks = $this->checkJunctionTable($table)) === false) {
+                        continue;
+                    }
+    
+                    $relations = $this->generateManyManyRelations($table, $junctionFks, $relations);
+                }
+            }
+    
+            if ($this->generateRelations === self::RELATIONS_ALL_INVERSE) {
+                return $this->addInverseRelations($relations);
+            }
+    
+            return $relations;
+        }
     }
 
     /**
