@@ -104,7 +104,7 @@ class Schema extends \yii\db\Schema implements ConstraintFinderInterface
     /**
      * {@inheritdoc}
      */
-    protected function findTableNames($schema = '')
+    protected function findTableNames($schema = '', $relatedTables = [])
     {
         $sql = 'SHOW TABLES';
         if ($schema !== '') {
