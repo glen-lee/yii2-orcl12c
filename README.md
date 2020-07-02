@@ -80,3 +80,5 @@ It is recommended to use this repo as a base for your PHP project development. F
 
 6. Template (UI) Admin LTE : https://github.com/dmstr/yii2-adminlte-asset  
 
+## How about the other databases than Oracle12c?  ##
+1. For MySql : Change the connection string and make sure you create the tables using InnoDB Engine, so that the foreign keys could be detected (MyISAM doesn't support Foreign Keys in certain MySql versions - yet to be tested)
