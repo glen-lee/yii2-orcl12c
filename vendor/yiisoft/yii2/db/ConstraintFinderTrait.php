@@ -45,7 +45,7 @@ trait ConstraintFinderTrait
      * cached data may be returned if available.
      * @return array array of metadata.
      */
-    abstract protected function getSchemaMetadata($schema, $type, $refresh);
+    abstract protected function getSchemaMetadata($schema, $type, $refresh, $relatedTables);
 
     /**
      * Loads a primary key for the given table.
