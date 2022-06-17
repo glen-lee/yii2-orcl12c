@@ -1,5 +1,7 @@
+**This is only for new UMN interns and developers. If you have ever cloned this repo and turning it into a project, please do not do a git pull. Instead, make a repo of your own in IT UMN Organization and store your changes there.**
+
 ## yii2-orcl12c ##
-Plain Yii2 basic with modified Gii core. Mainly intended to provide UMN developers with ready to use Yii2 basic that is compatible with dev and prod environment. 
+Plain Yii2 basic with modified Gii core. Mainly intended to provide UMN developers with ready to use Yii2 basic that is compatible with dev and prod environment. **Please use at least PHP 7.2**
 
 ## What's the difference between this and the original Yii2? ##
 Functionality wise, none. This repo is meant to store all the modifications needed to make Yii2 performance better when it is paired with Oracle 12c or the newer versions (not tested yet). There might be additions along the way when more performance issues with Oracle 12c arise - or when there are major updates in Yii2 new releases.
@@ -34,8 +36,9 @@ It is recommended to use this repo as a base for your PHP project development. F
    * Replace `SERVICE_NAME` with the Service you'd like to connect to (default is `ORCL`)
    * Replace `DB_USER` and `DB_PASS` with your Oracle credentials
    * It is also recommended to set `enableSchemaCache` as `true`
-9. Start your webserver
-10. Go to http://localhost/YOUR_YII2_FOLDER_NAME/web/index.php?r=gii%2Fdefault%2Fview&id=model to test. If there's no error then you're good to start coding your project!
+9. Run `composer install`
+10. Start your webserver
+11. Go to http://localhost/YOUR_YII2_FOLDER_NAME/web/index.php?r=gii%2Fdefault%2Fview&id=model to test. If there's no error then you're good to start coding your project!
  
 **B. If you have an access to the development server (FOR IT UMN DEV):**
 1. Connect to development server
@@ -48,7 +51,8 @@ It is recommended to use this repo as a base for your PHP project development. F
    * Replace `DB_USER` and `DB_PASS` with remote Oracle credentials
    * It is also recommended to set `enableSchemaCache` as `true`
 5. Start your webserver
-6. Go to http://localhost/YOUR_YII2_FOLDER_NAME/web/index.php?r=gii%2Fdefault%2Fview&id=model to test. If there's no error then you're good to go!
+6. Run `composer install`
+7. Go to http://localhost/YOUR_YII2_FOLDER_NAME/web/index.php?r=gii%2Fdefault%2Fview&id=model to test. If there's no error then you're good to go!
 
 ## References for development using Yii2 Framework ##
 1. Autocomplete
