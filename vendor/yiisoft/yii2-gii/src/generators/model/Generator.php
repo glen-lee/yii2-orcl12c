@@ -569,19 +569,19 @@ class Generator extends \yii\gii\Generator
                 return [];
             }
 
-            $sql = <<<'SQL'
-    WITH 
-    U_CONS AS (SELECT /*+materialized*/ * FROM USER_CONSTRAINTS),
-    U_CONS_COL AS (SELECT /*+materialized*/ * FROM  USER_CONS_COLUMNS)
-    SELECT 
-        E.TABLE_NAME AS TABLE_REF,
-        E.CONSTRAINT_NAME
-    FROM U_CONS D JOIN U_CONS E ON E.OWNER = D.R_OWNER AND E.CONSTRAINT_NAME = D.R_CONSTRAINT_NAME
-    WHERE
-        D.OWNER = :schemaName
-        AND D.TABLE_NAME = :tableName
-    ORDER BY D.CONSTRAINT_NAME
-    SQL;
+$sql = <<<'SQL'
+WITH 
+U_CONS AS (SELECT /*+materialized*/ * FROM USER_CONSTRAINTS),
+U_CONS_COL AS (SELECT /*+materialized*/ * FROM  USER_CONS_COLUMNS)
+SELECT 
+E.TABLE_NAME AS TABLE_REF,
+E.CONSTRAINT_NAME
+FROM U_CONS D JOIN U_CONS E ON E.OWNER = D.R_OWNER AND E.CONSTRAINT_NAME = D.R_CONSTRAINT_NAME
+WHERE
+D.OWNER = :schemaName
+AND D.TABLE_NAME = :tableName
+ORDER BY D.CONSTRAINT_NAME
+SQL;
 
             foreach ($schemaNames as $schemaName) {
                 $command = $db->createCommand($sql, [
