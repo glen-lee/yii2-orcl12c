@@ -68,30 +68,32 @@ class QueryBuilder extends \yii\db\QueryBuilder
      */
     public function buildOrderByAndLimit($sql, $orderBy, $limit, $offset)
     {
-        $orderBy = $this->buildOrderBy($orderBy);
-        if ($orderBy !== '') {
-            $sql .= $this->separator . $orderBy;
+        // Construct the ORDER BY clause
+        $orderByClause = $this->buildOrderBy($orderBy);
+
+        // If orderByClause is empty, provide a default ordering to avoid syntax errors
+        $orderByPlaceholder = $orderByClause !== '' ? $orderByClause : 'ORDER BY NULL';
+
+        // If orderBy is not empty, append it to the SQL
+        if ($orderByClause !== '') {
+            $sql .= $this->separator . $orderByClause;
         }
 
-        $filters = [];
-        if ($this->hasOffset($offset)) {
-            $filters[] = 'rowNumId > ' . $offset;
-        }
-        if ($this->hasLimit($limit)) {
-            $filters[] = 'rownum <= ' . $limit;
-        }
-        if (empty($filters)) {
-            return $sql;
-        }
+        // Check if we need to add pagination
+        if ($this->hasOffset($offset) || $this->hasLimit($limit)) {
+            $offset = (int)$offset;
+            $limit = (int)$limit;
 
-        $filter = implode(' AND ', $filters);
-        return <<<EOD
-WITH USER_SQL AS ($sql),
-    PAGINATION AS (SELECT USER_SQL.*, rownum as rowNumId FROM USER_SQL)
-SELECT *
-FROM PAGINATION
-WHERE $filter
+            $sql = <<<EOD
+SELECT * FROM (
+    SELECT USER_SQL.*, ROW_NUMBER() OVER ($orderByPlaceholder) AS rowNumId
+    FROM ($sql) USER_SQL
+)
+WHERE rowNumId > $offset AND rowNumId <= $offset + $limit
 EOD;
+        }
+
+        return $sql;
     }
 
     /**
